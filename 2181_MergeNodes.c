@@ -65,32 +65,41 @@ void freeLinkedList(struct ListNode *head) {
 
 // Function prototype for the solution (you will implement this)
 struct ListNode *mergeNodes(struct ListNode *head) {
-  struct ListNode *resultHead;
+  struct ListNode *resultHead = NULL; // Mistake: not being initialized to NULL
+
   // use while loop to iterate through the linked list
   struct ListNode *currNode = head;
   int sum = 0; // 0 could represent this sequence hasn't start
 
-  while (currNode->next == NULL) {
-    // sum until reach the edge case
-    sum += currNode->val;
-
+  while (currNode != NULL) { // Mistake: currNode->next == NULL
     // reach the end of current sequence: value is 0 and sum isn't 0
     if (currNode->val == 0 && sum != 0) {
       // add current sum to result node
 
-      struct ListNode *nodeAdd = resultHead;
-      while (nodeAdd != NULL) {
-        nodeAdd = nodeAdd->next;
+      // add to the head
+      if (resultHead == NULL) {
+        resultHead = malloc(sizeof(struct ListNode));
+        resultHead->val = sum;
+        resultHead->next = NULL;
       }
 
-      nodeAdd = malloc(sizeof(struct ListNode));
-      nodeAdd->val = sum;
-      nodeAdd->next = NULL;
+      // add to the next node
+      struct ListNode *nodePre = resultHead;
+      struct ListNode *nodeNext = nodePre->next;
+      while (nodePre != NULL) {
+        nodePre = nodeNext;
+        nodeNext = nodeNext->next;
+      }
+
+      nodeNext = malloc(sizeof(struct ListNode));
+      nodeNext->val = sum;
+      nodeNext->next = NULL;
 
       // reset sum
       sum = 0;
+    } else {
+      sum += currNode->val;
     }
-
     currNode = currNode->next;
   }
 
