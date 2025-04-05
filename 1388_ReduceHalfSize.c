@@ -5,40 +5,39 @@
 int compare(const void *a, const void *b) { return (*(int *)b - *(int *)a); }
 
 int minSetSize(int *arr, int arrSize) {
-  // Initially allocate freq with size arrSize
+  // find the frequency of each number
   int freqSize = arrSize;
   int *freq = calloc(freqSize, sizeof(int));
 
-  // Count frequencies of each value, resize if needed
-  for (int i = 0; i < arrSize; i++) {
+  for (int i = 0; i < arrSize; i++) { // make mistake, change it into freqSize
     if (arr[i] >= freqSize) {
-      // Need to resize
-      int newSize = arr[i] + 1; // +1 because we need indices 0 to arr[i]
-      freq = realloc(freq, newSize * sizeof(int));
+      int newSize = arr[i] + 1;
+      freq = realloc(freq, newSize * sizeof(int)); // need to familiar
 
       // Initialize the new elements to zero
       for (int j = freqSize; j < newSize; j++) {
         freq[j] = 0;
       }
-
       freqSize = newSize;
     }
+
     freq[arr[i]]++;
   }
 
-  // Sort frequencies in descending order
+  // sort the frequency set in descending
   qsort(freq, freqSize, sizeof(int), compare);
 
-  // Remove elements until reaching half
-  int removed = 0;
+  // begin to remove the item in higher frequency until reach the threshold
+  int size = 0; // * make error in how to initialize
   int count = 0;
-  while (removed < arrSize / 2) {
-    removed += freq[count++];
+  while (size < (arrSize / 2)) { // make mistake about how to compare
+    size += freq[count++];
+    // count++;
   }
 
   free(freq);
   return count;
-}
+};
 
 int main() {
 
