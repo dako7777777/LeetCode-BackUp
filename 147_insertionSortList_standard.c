@@ -9,40 +9,43 @@ struct ListNode {
 
 // The corrected insertion sort implementation
 struct ListNode *insertionSortList(struct ListNode *head) {
-  // Handle empty list
-  if (!head)
-    return NULL;
+  if (!head || !head->next)
+    return head; // Mistake: without checking edge case
 
-  // Create a dummy node to simplify insertion at the beginning
-  struct ListNode dummy;
-  dummy.next = NULL;
+  struct ListNode *currNode = head->next;
+  struct ListNode *sortedHead = head;
+  head->next = NULL; // Mistake: missing this line, which create infinite loop
+                     // in following code
 
-  struct ListNode *curr = head;
-  struct ListNode *next;
+  while (currNode) {
+    // store the next in original list
+    struct ListNode *next = currNode->next;
 
-  // Process each node from the original list
-  while (curr) {
-    // Save next node before we change curr->next
-    next = curr->next;
-
-    // Find insertion position in sorted list
-    struct ListNode *prev = &dummy;
-    struct ListNode *iter = dummy.next;
-
-    while (iter && iter->val < curr->val) {
-      prev = iter;
-      iter = iter->next;
+    // case 1: if current node is smaller than head, it should be new head
+    // Mistake: should check before the loop for iterNode
+    if (currNode->val < sortedHead->val) {
+      currNode->next = sortedHead;
+      sortedHead = currNode;
     }
 
-    // Insert curr between prev and iter
-    curr->next = iter;
-    prev->next = curr;
+    // Case 2: Find position in the sorted list
+    else {
+      // iterate result node to find place to insert for current node
+      struct ListNode *iterNode = sortedHead;
+      // Find the node after which we should insert
+      while (iterNode->next && iterNode->next->val <= currNode->val) {
+        iterNode = iterNode->next;
+      }
 
-    // Move to next node in original list
-    curr = next;
+      // Insert after iterNode
+      currNode->next = iterNode->next;
+      iterNode->next = currNode;
+    }
+
+    // keep iterate
+    currNode = next;
   }
-
-  return dummy.next;
+  return sortedHead;
 }
 
 // Utility function to create a linked list from an array
