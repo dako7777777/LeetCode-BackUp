@@ -74,26 +74,24 @@ struct ListNode *mergeNodes(struct ListNode *head) {
   while (currNode != NULL) { // Mistake: currNode->next == NULL
     // reach the end of current sequence: value is 0 and sum isn't 0
     if (currNode->val == 0 && sum != 0) {
-      // add current sum to result node
+      // Create a new node with the current sum
+      struct ListNode *newNode = malloc(sizeof(struct ListNode));
+      newNode->val = sum;
+      newNode->next = NULL;
 
-      // add to the head
+      // If list is empty, set as head
       if (resultHead == NULL) {
-        resultHead = malloc(sizeof(struct ListNode));
-        resultHead->val = sum;
-        resultHead->next = NULL;
-      }
+        resultHead = newNode;
+      } else {
+        // Find the last node in the result list
+        struct ListNode *last = resultHead;
+        while (last->next != NULL) {
+          last = last->next;
+        }
 
-      // add to the next node
-      struct ListNode *nodePre = resultHead;
-      struct ListNode *nodeNext = nodePre->next;
-      while (nodePre != NULL) {
-        nodePre = nodeNext;
-        nodeNext = nodeNext->next;
+        // Connect the new node to the end
+        last->next = newNode;
       }
-
-      nodeNext = malloc(sizeof(struct ListNode));
-      nodeNext->val = sum;
-      nodeNext->next = NULL;
 
       // reset sum
       sum = 0;
