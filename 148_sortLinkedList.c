@@ -40,32 +40,35 @@ struct ListNode *getMid(struct ListNode *head) {
 }
 
 struct ListNode *merge(struct ListNode *left, struct ListNode *right) {
-  struct ListNode dummy;
-
+  // V1
   // forget to create current node,
   // instead, using dummy directly, which can work in loop
   // but change the head -- Therefore, dummy is not for loop purpose
-  struct ListNode *current = &dummy;
 
-  dummy.next = NULL;
+  // V2
+  //  use tail to simplify the solution
+  struct ListNode dummy;
+  struct ListNode *tail = &dummy;
+
+  dummy.next = NULL; // prevent containing random garbage
 
   while (left && right) {
     if (left->val < right->val) {
       // insertion
-      current->next = left;
+      tail->next = left;
       left = left->next;
     } else {
-      current->next = right;
+      tail->next = right;
       right = right->next;
     }
 
-    current = current->next;
+    tail = tail->next;
   }
 
   if (left) {
-    current->next = left;
+    tail->next = left;
   } else {
-    current->next = right;
+    tail->next = right;
   }
 
   return dummy.next;
