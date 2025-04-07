@@ -41,7 +41,12 @@ struct ListNode *getMid(struct ListNode *head) {
 
 struct ListNode *merge(struct ListNode *left, struct ListNode *right) {
   struct ListNode dummy;
+
+  // forget to create current node,
+  // instead, using dummy directly, which can work in loop
+  // but change the head -- Therefore, dummy is not for loop purpose
   struct ListNode *current = &dummy;
+
   dummy.next = NULL;
 
   while (left && right) {
@@ -67,6 +72,16 @@ struct ListNode *merge(struct ListNode *left, struct ListNode *right) {
 }
 
 struct ListNode *sortList(struct ListNode *head) {
+  // original method: caused by the lack of understanding of linked list
+  // in the method for array, the index is using as parameter, for linked list
+  // it has to be returned
+  // struct ListNode *mid = getMid(head);
+  // if (head != mid) {
+  //   sortList(head);
+  //   sortList(mid);
+  //   merge(head, mid);
+  // }
+
   if (!head || !head->next) {
     // Mistake: write the base case wrong, without !
     return head;

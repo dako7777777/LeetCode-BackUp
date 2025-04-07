@@ -9,43 +9,34 @@ struct ListNode {
 
 // The corrected insertion sort implementation
 struct ListNode *insertionSortList(struct ListNode *head) {
-  if (!head || !head->next)
+  if (!head)
     return head; // Mistake: without checking edge case
 
-  struct ListNode *currNode = head->next;
-  struct ListNode *sortedHead = head;
-  head->next = NULL; // Mistake: missing this line, which create infinite loop
-                     // in following code
+  // Create a dummy node to simplify insertion at the beginning
+  struct ListNode dummy;
+  dummy.next = NULL;
+
+  struct ListNode *currNode = head;
 
   while (currNode) {
-    // store the next in original list
-    struct ListNode *next = currNode->next;
+    struct ListNode *next = currNode->next; // Mistake: forget next
 
-    // case 1: if current node is smaller than head, it should be new head
-    // Mistake: should check before the loop for iterNode
-    if (currNode->val < sortedHead->val) {
-      currNode->next = sortedHead;
-      sortedHead = currNode;
+    // Create node for iteration use
+    struct ListNode *previous = &dummy; // Mistake: easy to forget the previous
+    struct ListNode *iter = dummy.next;
+
+    while (iter && iter->val < currNode->val) {
+      previous = iter;
+      iter = iter->next;
     }
 
-    // Case 2: Find position in the sorted list
-    else {
-      // iterate result node to find place to insert for current node
-      struct ListNode *iterNode = sortedHead;
-      // Find the node after which we should insert
-      while (iterNode->next && iterNode->next->val <= currNode->val) {
-        iterNode = iterNode->next;
-      }
+    // insertion
+    currNode->next = iter;
+    previous->next = currNode;
 
-      // Insert after iterNode
-      currNode->next = iterNode->next;
-      iterNode->next = currNode;
-    }
-
-    // keep iterate
     currNode = next;
   }
-  return sortedHead;
+  return dummy.next;
 }
 
 // Utility function to create a linked list from an array
