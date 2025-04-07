@@ -14,39 +14,146 @@ struct ListNode {
   struct ListNode *next;
 };
 
-struct ListNode *getMid(struct ListNode head) {
-  struct ListNode pre;
-  struct ListNode slow;
-  struct ListNode fast;
-  // = malloc(sizeof(struct ListNode));
+//========= solution for leet code ==========
+struct ListNode *getMid(struct ListNode *head) {
+  struct ListNode *prev;
+  struct ListNode *slow;
+  struct ListNode *fast;
 
-  // pre = NULL;
-  slow = *head;
-  fast = *head;
+  prev = NULL;
+  slow = head;
+  fast = head;
 
   // find the middle through while loop
-  while (fast.next) {
-    // why can't write fast in the condition of while loop
-    pre = slow;
-    slow = slow.next;
-    fast = fast.next.next;
+  while (fast && fast->next) {
+    prev = slow;
+    slow = slow->next;
+    fast = fast->next->next;
   }
 
-  // unchained the pre to the mid
-  free(pre);
+  // disconnect the first half from the second half
+  if (prev) {
+    prev->next = NULL;
+  }
 
   return slow;
 }
 
-void merge(struct ListNode *head, struct ListNode *mid) { struct ListNode next }
+struct ListNode *merge(struct ListNode *left, struct ListNode *right) {
+  struct ListNode dummy;
+  struct ListNode *current = &dummy;
+  dummy.next = NULL;
 
-void mergeSort(struct ListNode *head) {
+  while (left && right) {
+    if (left->val < right->val) {
+      // insertion
+      current->next = left;
+      left = left->next;
+    } else {
+      current->next = right;
+      right = right->next;
+    }
+
+    current = current->next;
+  }
+
+  if (left) {
+    current->next = left;
+  } else {
+    current->next = right;
+  }
+
+  return dummy.next;
+}
+
+struct ListNode *sortList(struct ListNode *head) {
+  if (!head || !head->next) {
+    // Mistake: write the base case wrong, without !
+    return head;
+  }
+
   struct ListNode *mid = getMid(head);
-  if (head != mid) {
-    mergeSort(head);
-    mergeSort(mid);
-    merge(head, mid);
+  struct ListNode *left = sortList(head);
+  struct ListNode *right = sortList(mid);
+  return merge(left, right);
+}
+
+// =================== Helper functions for testing ===================
+
+// Create a new node
+struct ListNode *createNode(int val) {
+  struct ListNode *node = (struct ListNode *)malloc(sizeof(struct ListNode));
+  node->val = val;
+  node->next = NULL;
+  return node;
+}
+
+// Create a linked list from an array
+struct ListNode *createList(int arr[], int size) {
+  if (size == 0)
+    return NULL;
+
+  struct ListNode *head = createNode(arr[0]);
+  struct ListNode *current = head;
+
+  for (int i = 1; i < size; i++) {
+    current->next = createNode(arr[i]);
+    current = current->next;
+  }
+
+  return head;
+}
+
+// Print a linked list
+void printList(struct ListNode *head) {
+  printf("[");
+  while (head != NULL) {
+    printf("%d", head->val);
+    if (head->next != NULL) {
+      printf(",");
+    }
+    head = head->next;
+  }
+  printf("]\n");
+}
+
+// Free memory used by a linked list
+void freeList(struct ListNode *head) {
+  struct ListNode *temp;
+  while (head != NULL) {
+    temp = head;
+    head = head->next;
+    free(temp);
   }
 }
 
-struct ListNode *sortList(struct ListNode *head) {}
+int main() {
+  // Example 1
+  int arr1[] = {4, 2, 1, 3};
+  struct ListNode *head1 = createList(arr1, 4);
+  printf("Example 1:\nInput: ");
+  printList(head1);
+  head1 = sortList(head1);
+  printf("Output: ");
+  printList(head1);
+  freeList(head1);
+
+  // Example 2
+  int arr2[] = {-1, 5, 3, 4, 0};
+  struct ListNode *head2 = createList(arr2, 5);
+  printf("\nExample 2:\nInput: ");
+  printList(head2);
+  head2 = sortList(head2);
+  printf("Output: ");
+  printList(head2);
+  freeList(head2);
+
+  // Example 3
+  printf("\nExample 3:\nInput: []\n");
+  struct ListNode *head3 = NULL;
+  head3 = sortList(head3);
+  printf("Output: ");
+  printList(head3);
+
+  return 0;
+}
