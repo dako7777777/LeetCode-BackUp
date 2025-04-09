@@ -57,6 +57,8 @@ struct TreeNode *sortedListToBST(struct ListNode *head) {
   }
 
   // base case 2?? create a single tree
+  // Mistake: should add base case 2
+
   if (head->next == NULL) {
     struct TreeNode *node = malloc(sizeof(struct TreeNode));
     node->val = head->val;

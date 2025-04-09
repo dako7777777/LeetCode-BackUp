@@ -14,24 +14,6 @@ struct ListNode {
   struct ListNode *next;
 };
 
-// Fixed version of getRestLists
-struct ListNode **getRestLists(struct ListNode **lists, int startIndex,
-                               int listsSize) {
-  int newLen = listsSize - startIndex;
-  if (newLen <= 0)
-    return NULL;
-
-  struct ListNode **result = malloc(newLen * sizeof(struct ListNode *));
-
-  // Properly copy pointers from the original array
-  memcpy(result, &lists[startIndex], newLen * sizeof(struct ListNode *));
-  // for (int i = 0; i < newLen; i++) {
-  //     result[i] = lists[startIndex + i];
-  // }
-
-  return result;
-}
-
 struct ListNode *merge(struct ListNode *node1, struct ListNode *node2) {
   struct ListNode dummy;
   struct ListNode *tail = &dummy;
@@ -61,22 +43,13 @@ struct ListNode *mergeKLists(struct ListNode **lists, int listsSize) {
   if (listsSize == 1)
     return lists[0];
 
-  // For merge sort approach, divide the lists into two halves
+  // Divide the lists into two halves
   int mid = listsSize / 2;
 
-  // Get first half
-  struct ListNode **leftLists = getRestLists(lists, 0, mid);
-  // Get second half
-  struct ListNode **rightLists = getRestLists(lists, mid, listsSize);
-
   // Recursively merge each half
-  struct ListNode *left = mergeKLists(leftLists, mid);
-  struct ListNode *right = mergeKLists(rightLists, listsSize - mid);
+  struct ListNode *left = mergeKLists(lists, mid);
+  struct ListNode *right = mergeKLists(lists + mid, listsSize - mid);
 
-  // Free the temporary arrays
-  free(leftLists);
-  free(rightLists);
-
-  // Merge the two sorted halves and return
+  // Merge the two sorted halves
   return merge(left, right);
 }

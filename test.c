@@ -1,72 +1,82 @@
-struct ListNode *getMid(struct ListNode *head) {
-  struct ListNode *prev;
-  struct ListNode *slow;
-  struct ListNode *fast;
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-  prev = NULL;
-  slow = head;
-  fast = head;
+struct ListNode {
+  int val;
+  struct ListNode *next;
+};
 
-  // find the middle through while loop
-  while (fast && fast->next) {
-    prev = slow;
-    slow = slow->next;
-    fast = fast->next->next;
-  }
+// Fixed version of getRestLists
+struct ListNode **getRestLists(struct ListNode **lists, int startIndex,
+                               int listsSize) {
+  int newLen = listsSize - startIndex;
+  if (newLen <= 0)
+    return NULL;
 
-  // disconnect the first half from the second half
-  if (prev) {
-    prev->next = NULL;
-  }
+  struct ListNode **result = malloc(newLen * sizeof(struct ListNode *));
 
-  return slow;
+  // Properly copy pointers from the original array
+  memcpy(result, &lists[startIndex], newLen * sizeof(struct ListNode *));
+  // for (int i = 0; i < newLen; i++) {
+  //     result[i] = lists[startIndex + i];
+  // }
+
+  return result;
 }
 
-void merge(struct ListNode *left, struct ListNode *right) {
+struct ListNode *merge(struct ListNode *node1, struct ListNode *node2) {
   struct ListNode dummy;
-  dummy.next = NULL;
+  struct ListNode *tail = &dummy;
+  dummy.next = NULL; // Initialize dummy.next
 
-  while (left && right) {
-
-    if (left->val < right->val) {
-      // insertion
-      dummy.next = left;
-      left->next = NULL;
-
-      // move to the next node
-      left = left->next;
+  while (node1 && node2) {
+    if (node1->val <= node2->val) {
+      tail->next = node1;
+      node1 = node1->next;
     } else {
-      // insertion
-      dummy.next = right;
-      right->next = NULL;
-
-      // move to the next node
-      right = right->next;
+      tail->next = node2;
+      node2 = node2->next;
     }
-
-    dummy.next = dummy.next->next;
+    tail = tail->next;
   }
 
-  while (left) {
-    dummy.next = left;
-    left->next = NULL;
-  }
+  // Attach remaining nodes
+  tail->next = node1 ? node1 : node2;
 
-  while (right) {
-    dummy.next = right;
-    right->next = NULL;
-  }
-
-  left = dummy.next;
+  return dummy.next;
 }
 
-struct ListNode *sortList(struct ListNode *head) {
-  struct ListNode *mid = getMid(head);
-  if (head != mid) {
-    sortList(head);
-    sortList(mid);
-    merge(head, mid);
-  }
+struct ListNode *mergeKLists(struct ListNode **lists, int listsSize) {
+  // Base cases
+  if (listsSize == 0)
+    return NULL;
+  if (listsSize == 1)
+    return lists[0];
 
-  return head;
+  // For merge sort approach, divide the lists into two halves
+  int mid = listsSize / 2;
+
+  // Get first half
+  struct ListNode **leftLists = getRestLists(lists, 0, mid);
+  // Get second half
+  struct ListNode **rightLists = getRestLists(lists, mid, listsSize);
+
+  // Recursively merge each half
+  struct ListNode *left = mergeKLists(leftLists, mid);
+  struct ListNode *right = mergeKLists(rightLists, listsSize - mid);
+
+  // Free the temporary arrays
+  free(leftLists);
+  free(rightLists);
+
+  // Merge the two sorted halves and return
+  return merge(left, right);
 }
