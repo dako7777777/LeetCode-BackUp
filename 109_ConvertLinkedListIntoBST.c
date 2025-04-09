@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct ListNode {
   int val;
@@ -27,26 +28,6 @@ struct TreeNode {
   struct TreeNode *left;
   struct TreeNode *right;
 };
-
-struct TreeNode *assemble(struct ListNode *left, struct ListNode *mid,
-                          struct ListNode *right) {
-  // may need to check the NULL case
-  struct TreeNode *leftChild = malloc(sizeof(struct TreeNode));
-  struct TreeNode *midTree = malloc(sizeof(struct TreeNode));
-  struct TreeNode *rightChild = malloc(sizeof(struct TreeNode));
-
-  leftChild->val = left->val;
-  leftChild->left = NULL;
-  leftChild->right = NULL;
-
-  rightChild->val = right->val;
-  rightChild->left = NULL;
-  rightChild->right = NULL;
-
-  midTree->val = mid->val;
-  midTree->left = leftChild;
-  midTree->right = rightChild;
-}
 
 struct ListNode *getMid(struct ListNode *head) {
   struct ListNode *pre, *slow, *fast; // easy to make mistake without using *
@@ -61,21 +42,36 @@ struct ListNode *getMid(struct ListNode *head) {
 
   // disconnect pre to current linked list
   if (pre) {
-    pre = NULL;
+    pre->next = NULL; // Mistake: write pre = NULL -- question
+    // but why we need to disconnect, since pre is a local variable, seems
+    // nothing will connect to slow? use this to cut the linked list as half
   }
 
   return slow;
 }
 
 struct TreeNode *sortedListToBST(struct ListNode *head) {
-  // base case
-  if (head == NULL || head->next == NULL) {
-    return head;
+  // base case 1
+  if (head == NULL) {
+    return NULL;
+  }
+
+  // base case 2?? create a single tree
+  if (head->next == NULL) {
+    struct TreeNode *node = malloc(sizeof(struct TreeNode));
+    node->val = head->val;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
   }
 
   // recursion part
-  ListNode *mid = getMid(head);
-  ListNode *left = sortedListToBST(head);
-  ListNode *right = sortedListToBST(mid->next); // mid or mid->next?
-  return assemble(left, mid, right);
+
+  // get the middle node and use it to create root
+  struct ListNode *mid = getMid(head);
+  struct TreeNode *root = malloc(sizeof(struct TreeNode));
+  root->val = mid->val;
+
+  root->left = sortedListToBST(head);
+  root->right = sortedListToBST(mid->next)
 }
