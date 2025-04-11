@@ -8,44 +8,50 @@ typedef struct vertex {
   struct vertex *next;
 } vertex_t;
 
-typedef struct adj_list {
-  int numVertices;
-  vertex_t **adjList;
-} adj_list_t;
+// since the numVertices is known, we can skip using this data struct
 
-void add_node(vertex_t *head, int nextCourseNum) {
+// typedef struct adj_list {
+//   int numVertices;
+//   vertex_t **adjList;
+// } adj_list_t;
+
+void add_edge(vertex_t **adjList, int course, int prereq) {
   vertex_t *newNode = malloc(sizeof(vertex_t));
-  newNode->courseNum = nextCourseNum;
-  newNode->next = NULL;
-  head->next = newNode;
+  newNode->courseNum = prereq; // Mistaken: store wrongly with course
+
+  // prepend: the code for first node and the rest is the same
+  newNode->next = adjList[course];
+  adjList[course] = newNode;
 }
 
-bool cycle(vertex_t *course, int *checkStatus) {
+bool cycle(int courseNum, vertex_t **adjList, int *visited) {
+  // Mistaken(important): the first node in the item of adjacency list is the
+  // pre instead of course itself the course is the index number!
   // this function will return true to represent there is a cycle
   // -1 represent there is a cycle; 1 represent visited
 
   // base case 1: there is a cycle
-  if (checkStatus[course->courseNum] == -1) {
+  if (visited[courseNum] == -1) {
     return true;
   }
 
   // base case 2: there is no cycle
-  if (checkStatus[course->courseNum] == 1) {
+  if (visited[courseNum] == 1) {
     return false;
   }
 
   // recursion part: handle not visited case
-  checkStatus[course->courseNum] = -1;
+  visited[courseNum] = -1;
 
-  vertex_t *current = course->next;
+  vertex_t *current = adjList[courseNum];
   while (current) {
-    if (cycle(current, checkStatus)) {
+    if (cycle(current, visited)) {
       return true;
     }
     current = current->next;
   }
 
-  checkStatus[course->courseNum] = 1;
+  visited[courseNum] = 1;
   return false;
 }
 
@@ -54,39 +60,33 @@ bool canFinish(int numCourses, int **prerequisites, int prerequisitesSize,
 
   // # 1 initialize data
   // ## 1.1 add prereq to adjacency list
-  adj_list_t *courseAdj = malloc(sizeof(adj_list_t));
-  courseAdj->adjList = malloc(sizeof(vertex_t *));
-  courseAdj->numVertices = 0; // need check
+  vertex_t **adjList = calloc(numCourses, sizeof(vertex_t *));
 
+  // Build graph
+  for (int i = 0; i < prerequisitesSize; i++) {
+    int course = prerequisites[i][0];
+    int prereq = prerequisites[i][1];
+    add_edge(adjList, course, prereq);
+  }
+
+  // ## 1.2 create an array to store the status of each course
+  int *visited =
+      calloc(numCourses, sizeof(int)); // set parameter wrongly, in opposite
+
+  // # 2: check whether there is a cycle in each class
   for (int i = 0; i < numCourses; i++) {
-    vertex_t *newCourse = malloc(sizeof(vertex_t));
-    newCourse->courseNum = i;
-    newCourse->next = NULL;
-
-    for (int j = 0; j < prerequisitesSize; j++) {
-      // find the array store the prereq for the current course
-
-      if (i == prerequisites[j][0]) {
-        vertex_t *current = newCourse;
-        for (int k = 1; k < *prerequisitesColSize; k++) {
-          vertex_t *temp = current->next;
-          add_node(current, prerequisites[j][k]);
-          current = temp;
-        }
+    // Mistaken: didn't check whether the vertex has been visited
+    if (visited[i] == 0) {
+      // if there is a cycle, then return false
+      if (cycle(i, adjList, visited)) {
+        free(visited);
+        // Free adjList here
+        return false;
       }
     }
   }
 
-  // ## 1.2 create an array to store the status of each course
-  int *checkStatus = calloc(sizeof(int), 100);
-
-  // # 2: check whether there is a cycle in each class
-  for (int i = 0; i < courseAdj->numVertices; i++) {
-    // if there is a cycle, then return false
-    if (cycle(courseAdj->adjList[i], checkStatus)) {
-      return false;
-    }
-  }
-
+  free(visited);
+  // Free adjList here
   return true;
 }
